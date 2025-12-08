@@ -1,12 +1,14 @@
-'''
+"""
 Функции обработки файлов
-'''
+"""
+
 import argparse
 from pathlib import Path
 from file_path_iterator import FilePathIterator
 from parsing import fetch_audio_urls, download_audio_files, save_annotation
 
-INSTRUMENTS: list[str] = ['trumpet', 'ukulele', 'harp']
+INSTRUMENTS: list[str] = ["trumpet", "ukulele", "harp"]
+
 
 def count_files(lst: list[list[str]]) -> int:
     """Вычислить количество скаченных файлов
@@ -20,6 +22,7 @@ def count_files(lst: list[list[str]]) -> int:
             count = min(count, len(sublist))
     return count
 
+
 def print_annotation(csv_path: Path) -> None:
     """
     Вывести содержимое аннотации через итератор.
@@ -30,25 +33,29 @@ def print_annotation(csv_path: Path) -> None:
     try:
         iterator = FilePathIterator(str(csv_path))
         for filename, abs_path, rel_path in iterator:
-            print(f"Имя файла: {filename}"
-                  f" Относительный путь: {rel_path};"
-                  f" Абсолютный путь: {abs_path}")
+            print(
+                f"Имя файла: {filename}"
+                f" Относительный путь: {rel_path};"
+                f" Абсолютный путь: {abs_path}"
+            )
     except FileNotFoundError:
         print(f"Файл {csv_path} не найден")
     except OSError as e:
         print(f"Ошибка чтения файла '{csv_path}': {e}")
+
 
 def main() -> None:
     """
     Основная функция для скачивания аудиофайлов.
     """
     try:
-        parser = argparse.ArgumentParser(description='Обработка данных пользователей')
-        parser.add_argument('save_directory', type=str,
-                            help='Путь к директории для сохранения файлов')
-        parser.add_argument('-a', '--annotation',
-            type=str, help='Путь к файлу аннотоции',
-            default=None)
+        parser = argparse.ArgumentParser(description="Обработка данных пользователей")
+        parser.add_argument(
+            "save_directory", type=str, help="Путь к директории для сохранения файлов"
+        )
+        parser.add_argument(
+            "-a", "--annotation", type=str, help="Путь к файлу аннотоции", default=None
+        )
         args = parser.parse_args()
         save_dir = args.save_directory
         if save_dir is None:
@@ -67,15 +74,12 @@ def main() -> None:
         all_data: list[list[str]] = []
         for instrument in INSTRUMENTS:
             data = download_audio_files(
-                instrument,
-                audio_map[instrument],
-                count_audio,
-                save_dir
+                instrument, audio_map[instrument], count_audio, save_dir
             )
             all_data.extend(data)
         csv_path = args.annotation
         if csv_path is None:
-            csv_path = save_dir / 'annotation.csv'
+            csv_path = save_dir / "annotation.csv"
         else:
             csv_path = Path(args.annotation)
         save_annotation(all_data, csv_path)

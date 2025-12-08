@@ -1,15 +1,17 @@
-'''
-Итератор по путям файлов из CSV-аннотации 
-'''
+"""
+Итератор по путям файлов из CSV-аннотации
+"""
+
 import csv
 from pathlib import Path
 
+
 class FilePathIterator:
     """Итератор по путям файлов из CSV-аннотации.
-        
-        annotation_file: Путь к CSV-файлу аннотации.
-        rows: Список строк из CSV-файла.
-        _index: Текущий индекс при переборе.
+
+    annotation_file: Путь к CSV-файлу аннотации.
+    rows: Список строк из CSV-файла.
+    _index: Текущий индекс при переборе.
 
     """
 
@@ -24,14 +26,10 @@ class FilePathIterator:
         self.rows: list[dict] = []
 
         if not self.annotation_file.exists():
-            raise FileNotFoundError(
-                f"Аннотация не найдена: {annotation_file}"
-            )
+            raise FileNotFoundError(f"Аннотация не найдена: {annotation_file}")
 
         try:
-            with open(
-                self.annotation_file, 'r', encoding='utf-8'
-            ) as f:
+            with open(self.annotation_file, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 self.rows = list(reader)
 
@@ -61,7 +59,7 @@ class FilePathIterator:
         self._index += 1
 
         return (
-            row.get('Filename', ''),
-            row.get('Absolute Path', ''),
-            row.get('Relative Path', '')
+            row.get("Filename", ""),
+            row.get("Absolute Path", ""),
+            row.get("Relative Path", ""),
         )

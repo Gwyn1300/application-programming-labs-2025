@@ -1,6 +1,7 @@
-'''
+"""
 Запуск программы
-'''
+"""
+
 from function import main
 
 if __name__ == "__main__":

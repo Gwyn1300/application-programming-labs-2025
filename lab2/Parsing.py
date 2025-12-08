@@ -1,13 +1,14 @@
-'''
+"""
 Функции для парсинга страницы
-'''
+"""
+
 import csv
 from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-
 BASE_URL: str = "https://mixkit.co/free-stock-music/instrument/"
+
 
 def fetch_audio_urls(instrument: str) -> list[str]:
     """
@@ -29,40 +30,35 @@ def fetch_audio_urls(instrument: str) -> list[str]:
         return []
 
     try:
-        soup = BeautifulSoup(response.text, 'lxml')
+        soup = BeautifulSoup(response.text, "lxml")
 
-        main = soup.find('main')
+        main = soup.find("main")
         if not main:
-            raise ValueError('Main block not found')
+            raise ValueError("Main block not found")
 
-        ordering = main.find('div', class_='item-grid__ordering')
+        ordering = main.find("div", class_="item-grid__ordering")
         if not ordering:
-            raise ValueError('Ordering block not found')
+            raise ValueError("Ordering block not found")
 
-        wrapper = ordering.find('div', class_='item-grid__wrapper')
+        wrapper = ordering.find("div", class_="item-grid__wrapper")
         if not wrapper:
-            raise ValueError('Wrapper block not found')
+            raise ValueError("Wrapper block not found")
 
-        items_block = wrapper.find('div', class_='item-grid__items')
+        items_block = wrapper.find("div", class_="item-grid__items")
         if not items_block:
-            raise ValueError('Items block not found')
+            raise ValueError("Items block not found")
 
-        all_audio = items_block.find_all('div', class_='item-grid__item')
+        all_audio = items_block.find_all("div", class_="item-grid__item")
         for audio in all_audio:
-            card = audio.find(
-                'div',
-                class_='item-grid-card item-grid-card--show-meta'
-            )
+            card = audio.find("div", class_="item-grid-card item-grid-card--show-meta")
             if not card:
                 continue
 
-            audio_player = card.find('div', {'data-test-id': 'audio-player'})
+            audio_player = card.find("div", {"data-test-id": "audio-player"})
             if not audio_player:
                 continue
 
-            audio_link = audio_player.get(
-                'data-audio-player-preview-url-value'
-            )
+            audio_link = audio_player.get("data-audio-player-preview-url-value")
             if not audio_link:
                 continue
 
@@ -74,11 +70,9 @@ def fetch_audio_urls(instrument: str) -> list[str]:
         print(f"Ошибка парсинга страницы для {instrument}: {e}")
         return []
 
+
 def download_audio_files(
-    instrument: str,
-    urls: list[str],
-    count: int,
-    script_dir: Path
+    instrument: str, urls: list[str], count: int, script_dir: Path
 ) -> list[list[str]]:
     """
     Скачать аудиофайлы и создать записи аннотации.
@@ -92,7 +86,7 @@ def download_audio_files(
     audio_number: int = 0
     data: list[list[str]] = []
 
-    download_dir = script_dir / 'Downloads' / instrument
+    download_dir = script_dir / "Downloads" / instrument
     download_dir.mkdir(parents=True, exist_ok=True)
 
     for i in range(count):
@@ -125,10 +119,8 @@ def download_audio_files(
     print(f"Все аудио обработаны для инструмента '{instrument}'")
     return data
 
-def save_annotation(
-    data: list[list[str]],
-    csv_path: Path
-) -> None:
+
+def save_annotation(data: list[list[str]], csv_path: Path) -> None:
     """
     Сохранить аннотацию в CSV-файл.
 
@@ -137,9 +129,9 @@ def save_annotation(
     :raises IOError: При ошибке записи файла.
     """
     try:
-        with open(csv_path, mode='w', newline='', encoding='utf-8') as f:
+        with open(csv_path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
-            writer.writerow(['Filename', 'Absolute Path', 'Relative Path'])
+            writer.writerow(["Filename", "Absolute Path", "Relative Path"])
             writer.writerows(data)
         print(f"CSV файл успешно создан: {csv_path}")
     except IOError as e:
