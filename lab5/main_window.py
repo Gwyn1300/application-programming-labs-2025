@@ -54,11 +54,8 @@ class AudioPlayerWindow(QtWidgets.QMainWindow):
         self.lbl_current_file = QtWidgets.QLabel("Файл не загружен")
         self.lbl_current_file.setWordWrap(True)
 
-        self.lbl_amplitude = QtWidgets.QLabel("Амплитуда: --")
-
         file_layout.addLayout(button_layout)
         file_layout.addWidget(self.lbl_current_file)
-        file_layout.addWidget(self.lbl_amplitude)
         file_group.setLayout(file_layout)
 
         info_group = QtWidgets.QGroupBox("Информация о треке")
@@ -221,7 +218,7 @@ class AudioPlayerWindow(QtWidgets.QMainWindow):
         with open(csv_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(
-                ["Filename", "Absolute Path", "Relative Path", "Amplitude range"]
+                ["Filename", "Absolute Path", "Relative Path"]
             )
 
             for audio_file in audio_files:
@@ -255,9 +252,6 @@ class AudioPlayerWindow(QtWidgets.QMainWindow):
             track_name = Path(filename).stem if filename else Path(abs_path).stem
             self.lbl_track_name.setText(f"Название: {track_name}")
             self.lbl_current_file.setText(f"Файл: {filename or Path(abs_path).name}")
-
-            amplitude = row.get("Amplitude range", "не указана")
-            self.lbl_amplitude.setText(f"Амплитуда: {amplitude}")
 
             self.current_file_index = index
             self.update_navigation_buttons()
