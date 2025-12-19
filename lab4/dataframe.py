@@ -5,10 +5,11 @@
 import pandas as pd
 import numpy as np
 import soundfile as sf
+from typing import List, Tuple
 from graph import creat_graph
 
 
-def calculate_amplitude_range(file_path) -> float:
+def calculate_amplitude_range(file_path: str) -> float:
     """
     Вычисляет размах амплитуды (max-min) аудиофайла
     :file_path: Путь к аудиофайлу.
@@ -23,21 +24,30 @@ def calculate_amplitude_range(file_path) -> float:
         print(f"Ошибка при чтении файла {file_path}: {e}")
         return None
 
+def min_max_values(amplitude_ranges: List[float]) -> Tuple[float, float]:
+    """
+    Вычисляет минимальное и максимальное значения амплитуды
+    :amplitude_ranges: Список диапазонов амплитуды.
+    """
+    valid_values = [v for v in amplitude_ranges if not pd.isna(v)]
+    if not valid_values:
+        return [None, None]
+    min_val = min(valid_values)
+    max_val = max(valid_values)
+    return [min_val, max_val]
 
-def create_range_label(value, amplitude_ranges) -> str:
+def create_range_label(value: float, min_val: float, max_val: float ) -> str:
     """
     Создает метку диапазона для значения размаха амплитуды
     :value: Значение размаха амплитуды.
-    :amplitude_ranges: Список диапазонов амплитуды.
+    :min_val: минимальное значение амплитуды
+    :max_val: максимальное значение амплитуды
     """
     if pd.isna(value):
         return "Ошибка чтения"
-    valid_values = [v for v in amplitude_ranges if not pd.isna(v)]
-    if not valid_values:
-        return "Нет данных"
-    min_val = min(valid_values)
-    max_val = max(valid_values)
     num_bins = 7
+    if (not max_val or not min_val):
+        return "Нет данных"
     bin_edges = np.linspace(min_val, max_val + 0.01, num_bins + 1)
     for i in range(len(bin_edges) - 1):
         if bin_edges[i] <= value < bin_edges[i + 1]:
@@ -45,7 +55,7 @@ def create_range_label(value, amplitude_ranges) -> str:
     return f"{bin_edges[-2]:.2f}-{bin_edges[-1]:.2f}"
 
 
-def sort_by_amplitude_range(df) -> pd.DataFrame:
+def sort_by_amplitude_range(df: pd.DataFrame) -> pd.DataFrame:
     """
     Сортирует DataFrame по диапазону амплитуды
     :df: DataFrame с колонкой "_amplitude_range_numeric
@@ -54,7 +64,7 @@ def sort_by_amplitude_range(df) -> pd.DataFrame:
     return sorted_df.drop(columns=["_amplitude_range_numeric"])
 
 
-def filter_by_amplitude_range(df, target_range) -> pd.DataFrame:
+def filter_by_amplitude_range(df: pd.DataFrame, target_range: str) -> pd.DataFrame:
     """
     Фильтрует DataFrame по конкретному диапазону амплитуды
     :df: DataFrame с колонкой "Amplitude range
@@ -64,7 +74,7 @@ def filter_by_amplitude_range(df, target_range) -> pd.DataFrame:
     return filtered_df.drop(columns=["_amplitude_range_numeric"])
 
 
-def create_dataframe(csv_path, save_path) -> None:
+def create_dataframe(csv_path: str, save_path: str) -> None:
     """
     Создает DataFrame из CSV-файла, вычисляет размах амплитуды и строит график
     :csv_path: Путь к CSV-файлу с аннотацией.
@@ -74,8 +84,9 @@ def create_dataframe(csv_path, save_path) -> None:
     df = df[["Absolute Path", "Relative Path"]]
     print("Вычисление размаха амплитуды для аудиофайлов...")
     amplitude_ranges = df["Absolute Path"].apply(calculate_amplitude_range)
+    min_val, max_val = min_max_values(amplitude_ranges)
     df["Amplitude range"] = [
-        create_range_label(val, amplitude_ranges) for val in amplitude_ranges
+        create_range_label(val, min_val, max_val) for val in amplitude_ranges
     ]
     df["_amplitude_range_numeric"] = amplitude_ranges
     sorted_df = sort_by_amplitude_range(df)

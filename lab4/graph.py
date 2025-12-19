@@ -3,9 +3,10 @@
 """
 
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
-def creat_graph(range_counts, save_path):
+def creat_graph(range_counts: pd.Series, save_path: str) -> None:
     """Создает график распределения аудиофайлов по диапазонам размаха амплитуды
     :range_counts: Series с количеством файлов в каждом диапазоне.
     :save_path: Путь к директории для сохранения графика
